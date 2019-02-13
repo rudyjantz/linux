@@ -41,6 +41,7 @@
 #include <linux/notifier.h>
 #include <linux/memory.h>
 #include <linux/printk.h>
+#include <linux/pt.h>
 
 #include <asm/uaccess.h>
 #include <asm/cacheflush.h>
@@ -1439,6 +1440,8 @@ SYSCALL_DEFINE6(mmap_pgoff, unsigned long, addr, unsigned long, len,
 	flags &= ~(MAP_EXECUTABLE | MAP_DENYWRITE);
 
 	retval = vm_mmap_pgoff(file, addr, len, prot, flags, pgoff);
+	if (pt_avail())
+		pt_on_mmap(file, retval, len, prot, pgoff);
 out_fput:
 	if (file)
 		fput(file);
@@ -2619,6 +2622,8 @@ EXPORT_SYMBOL(vm_munmap);
 
 SYSCALL_DEFINE2(munmap, unsigned long, addr, size_t, len)
 {
+	if (pt_avail() && pt_enabled())
+		return 0;
 	profile_munmap(addr);
 	return vm_munmap(addr, len);
 }

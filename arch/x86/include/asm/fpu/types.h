@@ -104,6 +104,7 @@ enum xfeature_bit {
 	XSTATE_BIT_OPMASK,
 	XSTATE_BIT_ZMM_Hi256,
 	XSTATE_BIT_Hi16_ZMM,
+	XSTATE_BIT_INTEL_PT,
 
 	XFEATURES_NR_MAX,
 };
@@ -116,6 +117,7 @@ enum xfeature_bit {
 #define XSTATE_OPMASK		(1 << XSTATE_BIT_OPMASK)
 #define XSTATE_ZMM_Hi256	(1 << XSTATE_BIT_ZMM_Hi256)
 #define XSTATE_Hi16_ZMM		(1 << XSTATE_BIT_Hi16_ZMM)
+#define XSTATE_INTEL_PT		(1 << XSTATE_BIT_INTEL_PT)
 
 #define XSTATE_FPSSE		(XSTATE_FP | XSTATE_SSE)
 #define XSTATE_AVX512		(XSTATE_OPMASK | XSTATE_ZMM_Hi256 | XSTATE_Hi16_ZMM)
@@ -153,6 +155,11 @@ struct mpx_struct {
 	struct bndcsr			bndcsr;
 };
 
+/* Intel PT support: */
+struct ipt_struct {
+	u8				reserved[128];
+};
+
 struct xstate_header {
 	u64				xfeatures;
 	u64				xcomp_bv;
@@ -162,7 +169,8 @@ struct xstate_header {
 /* New processor state extensions should be added here: */
 #define XSTATE_RESERVE			(sizeof(struct ymmh_struct) + \
 					 sizeof(struct lwp_struct)  + \
-					 sizeof(struct mpx_struct)  )
+					 sizeof(struct mpx_struct)  + \
+					 sizeof(struct ipt_struct)  )
 /*
  * This is our most modern FPU state format, as saved by the XSAVE
  * and restored by the XRSTOR instructions.

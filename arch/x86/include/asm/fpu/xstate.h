@@ -23,10 +23,13 @@
 			| XSTATE_OPMASK | XSTATE_ZMM_Hi256 | XSTATE_Hi16_ZMM)
 
 /* Supported features which require eager state saving */
-#define XSTATE_EAGER	(XSTATE_BNDREGS | XSTATE_BNDCSR)
+#define XSTATE_EAGER	(XSTATE_BNDREGS | XSTATE_BNDCSR | XSTATE_INTEL_PT)
+
+/* Supported supervisor features */
+#define XSTATE_SUPERVISOR XSTATE_INTEL_PT
 
 /* All currently supported features */
-#define XCNTXT_MASK	(XSTATE_LAZY | XSTATE_EAGER)
+#define XCNTXT_MASK	(XSTATE_LAZY | XSTATE_EAGER | XSTATE_SUPERVISOR)
 
 #ifdef CONFIG_X86_64
 #define REX_PREFIX	"0x48, "

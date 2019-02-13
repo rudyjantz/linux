@@ -225,7 +225,7 @@ static void __init fpu__init_system_xstate_size_legacy(void)
 	 * ( This is easy to backport while we are fixing
 	 *   XSAVES* support. )
 	 */
-	setup_clear_cpu_cap(X86_FEATURE_XSAVES);
+	//setup_clear_cpu_cap(X86_FEATURE_XSAVES);
 }
 
 /*

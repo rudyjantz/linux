@@ -23,6 +23,7 @@ static const char *xfeature_names[] =
 	"AVX-512 opmask"		,
 	"AVX-512 Hi256"			,
 	"AVX-512 ZMM_Hi256"		,
+	"Intel PT"			,
 	"unknown xstate feature"	,
 };
 
@@ -165,7 +166,8 @@ void fpu__init_cpu_xstate(void)
 		return;
 
 	cr4_set_bits(X86_CR4_OSXSAVE);
-	xsetbv(XCR_XFEATURE_ENABLED_MASK, xfeatures_mask);
+	xsetbv(XCR_XFEATURE_ENABLED_MASK, xfeatures_mask & ~XSTATE_SUPERVISOR);
+	wrmsrl(MSR_IA32_XSS, xfeatures_mask & XSTATE_SUPERVISOR);
 }
 
 /*
@@ -212,6 +214,7 @@ static void __init print_xstate_features(void)
 	print_xstate_feature(XSTATE_OPMASK);
 	print_xstate_feature(XSTATE_ZMM_Hi256);
 	print_xstate_feature(XSTATE_Hi16_ZMM);
+	print_xstate_feature(XSTATE_INTEL_PT);
 }
 
 /*
@@ -338,6 +341,9 @@ void __init fpu__init_system_xstate(void)
 	cpuid_count(XSTATE_CPUID, 0, &eax, &ebx, &ecx, &edx);
 	xfeatures_mask = eax + ((u64)edx << 32);
 
+	cpuid_count(XSTATE_CPUID, 1, &eax, &ebx, &ecx, &edx);
+	xfeatures_mask |= ecx + ((u64)edx << 32);
+
 	if ((xfeatures_mask & XSTATE_FPSSE) != XSTATE_FPSSE) {
 		pr_err("x86/fpu: FP/SSE not present amongst the CPU's xstate features: 0x%llx.\n", xfeatures_mask);
 		BUG();
@@ -371,8 +377,11 @@ void fpu__resume_cpu(void)
 	/*
 	 * Restore XCR0 on xsave capable CPUs:
 	 */
-	if (cpu_has_xsave)
-		xsetbv(XCR_XFEATURE_ENABLED_MASK, xfeatures_mask);
+	if (cpu_has_xsave) {
+		xsetbv(XCR_XFEATURE_ENABLED_MASK,
+				xfeatures_mask & ~XSTATE_SUPERVISOR);
+		wrmsrl(MSR_IA32_XSS, xfeatures_mask & XSTATE_SUPERVISOR);
+	}
 }
 
 /*
@@ -402,7 +411,7 @@ void *get_xsave_addr(struct xregs_state *xsave, int xstate_feature)
 	if (!boot_cpu_has(X86_FEATURE_XSAVE))
 		return NULL;
 
-	xsave = &current->thread.fpu.state.xsave;
+	//xsave = &current->thread.fpu.state.xsave;
 	/*
 	 * We should not ever be requesting features that we
 	 * have not enabled.  Remember that pcntxt_mask is

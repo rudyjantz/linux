@@ -20,6 +20,8 @@
 
 #include "perf_event.h"
 
+#include <linux/pt.h>
+
 /*
  * Intel PerfMon, used on Core and later.
  */
@@ -1632,7 +1634,8 @@ again:
 	 */
 	if (__test_and_clear_bit(55, (unsigned long *)&status)) {
 		handled++;
-		intel_pt_interrupt();
+		if (pt_on_interrupt(regs) < 0)
+			intel_pt_interrupt();
 	}
 
 	/*
