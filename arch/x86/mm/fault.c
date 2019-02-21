@@ -1177,6 +1177,7 @@ __do_page_fault(struct pt_regs *regs, unsigned long error_code,
 	if (unlikely(!down_read_trylock(&mm->mmap_sem))) {
 		if ((error_code & PF_USER) == 0 &&
 		    !search_exception_tables(regs->ip)) {
+			goto retry;
 			bad_area_nosemaphore(regs, error_code, address);
 			return;
 		}

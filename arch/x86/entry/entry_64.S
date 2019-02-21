@@ -184,6 +184,8 @@ entry_SYSCALL_64_fastpath:
 	movq	%r10, %rcx
 	call	*sys_call_table(, %rax, 8)
 	movq	%rax, RAX(%rsp)
+	movq	%rsp, %rdi
+	call	pt_on_syscall
 1:
 /*
  * Syscall return path ending with SYSRET (fast path).

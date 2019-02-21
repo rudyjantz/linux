@@ -108,6 +108,7 @@ enum xfeature {
 	XFEATURE_OPMASK,
 	XFEATURE_ZMM_Hi256,
 	XFEATURE_Hi16_ZMM,
+	XFEATURE_INTEL_PT,
 
 	XFEATURE_MAX,
 };
@@ -120,6 +121,7 @@ enum xfeature {
 #define XFEATURE_MASK_OPMASK		(1 << XFEATURE_OPMASK)
 #define XFEATURE_MASK_ZMM_Hi256		(1 << XFEATURE_ZMM_Hi256)
 #define XFEATURE_MASK_Hi16_ZMM		(1 << XFEATURE_Hi16_ZMM)
+#define XFEATURE_MASK_INTEL_PT		(1 << XFEATURE_INTEL_PT)
 
 #define XFEATURE_MASK_FPSSE		(XFEATURE_MASK_FP | XFEATURE_MASK_SSE)
 #define XFEATURE_MASK_AVX512		(XFEATURE_MASK_OPMASK \
@@ -127,6 +129,7 @@ enum xfeature {
 					 | XFEATURE_MASK_Hi16_ZMM)
 
 #define FIRST_EXTENDED_XFEATURE	XFEATURE_YMM
+
 
 struct reg_128_bit {
 	u8      regbytes[128/8];
@@ -212,12 +215,22 @@ struct avx_512_hi16_state {
 	struct reg_512_bit		hi16_zmm[16];
 } __packed;
 
+/* Intel PT support: */
+struct ipt_struct {
+	u8				reserved[128];
+};
+
 struct xstate_header {
 	u64				xfeatures;
 	u64				xcomp_bv;
 	u64				reserved[6];
 } __attribute__((packed));
 
+/* New processor state extensions should be added here: */
+#define XSTATE_RESERVE			(sizeof(struct ymmh_struct) + \
+					 sizeof(struct lwp_struct)  + \
+					 sizeof(struct mpx_struct)  + \
+					 sizeof(struct ipt_struct)  )
 /*
  * This is our most modern FPU state format, as saved by the XSAVE
  * and restored by the XRSTOR instructions.

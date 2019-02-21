@@ -497,8 +497,20 @@ static inline void __cpu_disable_lazy_restore(unsigned int cpu)
 	per_cpu(fpu_fpregs_owner_ctx, cpu) = NULL;
 }
 
+static inline int fpu_has_pt_enabled(struct fpu *fpu)
+{
+	u64 *regs = (u64 *) get_xsave_addr(&fpu->state.xsave, XSTATE_INTEL_PT);
+
+	if (regs && (regs[0] & RTIT_CTL_TRACEEN))
+		return 1;
+	return 0;
+}
+
 static inline int fpu_want_lazy_restore(struct fpu *fpu, unsigned int cpu)
 {
+	if (fpu_has_pt_enabled(fpu))
+		return 0;
+
 	return fpu == this_cpu_read_stable(fpu_fpregs_owner_ctx) && cpu == fpu->last_cpu;
 }
 

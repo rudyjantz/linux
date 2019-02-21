@@ -261,6 +261,8 @@ static void fpu_copy(struct fpu *dst_fpu, struct fpu *src_fpu)
 		memcpy(&src_fpu->state, &dst_fpu->state, xstate_size);
 		fpregs_deactivate(src_fpu);
 	}
+	if (fpu_has_pt_enabled(dst_fpu))
+		copy_kernel_to_xregs(&dst_fpu->state.xsave, -1);
 	preempt_enable();
 }
 
@@ -408,7 +410,7 @@ void fpu__drop(struct fpu *fpu)
 static inline void copy_init_fpstate_to_fpregs(void)
 {
 	if (use_xsave())
-		copy_kernel_to_xregs(&init_fpstate.xsave, -1);
+		copy_kernel_to_xregs(&init_fpstate.xsave, ~XSTATE_SUPERVISOR);
 	else
 		copy_kernel_to_fxregs(&init_fpstate.fxsave);
 }

@@ -66,6 +66,8 @@
 
 #include <trace/events/sched.h>
 
+#include <linux/pt.h>
+
 int suid_dumpable = 0;
 
 static LIST_HEAD(formats);
@@ -1495,6 +1497,9 @@ static int do_execveat_common(int fd, struct filename *filename,
 	if (IS_ERR(filename))
 		return PTR_ERR(filename);
 
+	if (pt_avail())
+		pt_pre_execve();
+
 	/*
 	 * We move the actual failure in case of RLIMIT_NPROC excess from
 	 * set*uid() to execve() because too many poorly written programs
@@ -1601,6 +1606,8 @@ static int do_execveat_common(int fd, struct filename *filename,
 	putname(filename);
 	if (displaced)
 		put_files_struct(displaced);
+	if (pt_avail())
+		pt_on_execve();
 	return retval;
 
 out:
