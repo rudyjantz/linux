@@ -105,6 +105,8 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/task.h>
 
+#include <linux/pt.h>
+
 /*
  * Minimum number of threads to boot the kernel
  */
@@ -2242,6 +2244,9 @@ long _do_fork(unsigned long clone_flags,
 		init_completion(&vfork);
 		get_task_struct(p);
 	}
+
+        if (pt_avail())
+                pt_on_clone(p);
 
 	wake_up_new_task(p);
 

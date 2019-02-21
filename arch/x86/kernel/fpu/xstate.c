@@ -34,6 +34,7 @@ static const char *xfeature_names[] =
 	"AVX-512 ZMM_Hi256"		,
 	"Processor Trace (unused)"	,
 	"Protection Keys User registers",
+	"Intel PT"			,
 	"unknown xstate feature"	,
 };
 
@@ -232,7 +233,8 @@ void fpu__init_cpu_xstate(void)
 	xfeatures_mask &= ~XFEATURE_MASK_SUPERVISOR;
 
 	cr4_set_bits(X86_CR4_OSXSAVE);
-	xsetbv(XCR_XFEATURE_ENABLED_MASK, xfeatures_mask);
+	xsetbv(XCR_XFEATURE_ENABLED_MASK, xfeatures_mask & ~XSTATE_SUPERVISOR);
+	wrmsrl(MSR_IA32_XSS, xfeatures_mask & XSTATE_SUPERVISOR);
 }
 
 /*
@@ -312,6 +314,7 @@ static void __init print_xstate_features(void)
 	print_xstate_feature(XFEATURE_MASK_ZMM_Hi256);
 	print_xstate_feature(XFEATURE_MASK_Hi16_ZMM);
 	print_xstate_feature(XFEATURE_MASK_PKRU);
+	print_xstate_feature(XFEATURE_MASK_PT);
 }
 
 /*
@@ -744,6 +747,9 @@ void __init fpu__init_system_xstate(void)
 	cpuid_count(XSTATE_CPUID, 0, &eax, &ebx, &ecx, &edx);
 	xfeatures_mask = eax + ((u64)edx << 32);
 
+	cpuid_count(XSTATE_CPUID, 1, &eax, &ebx, &ecx, &edx);
+	xfeatures_mask |= ecx + ((u64)edx << 32);
+
 	if ((xfeatures_mask & XFEATURE_MASK_FPSSE) != XFEATURE_MASK_FPSSE) {
 		/*
 		 * This indicates that something really unexpected happened
@@ -801,7 +807,9 @@ void fpu__resume_cpu(void)
 	 * Restore XCR0 on xsave capable CPUs:
 	 */
 	if (boot_cpu_has(X86_FEATURE_XSAVE))
-		xsetbv(XCR_XFEATURE_ENABLED_MASK, xfeatures_mask);
+		xsetbv(XCR_XFEATURE_ENABLED_MASK,
+				xfeatures_mask & ~XSTATE_SUPERVISOR);
+		wrmsrl(MSR_IA32_XSS, xfeatures_mask & XSTATE_SUPERVISOR);
 }
 
 /*

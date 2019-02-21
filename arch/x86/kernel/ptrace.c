@@ -1344,7 +1344,8 @@ void __init update_regset_xstate_info(unsigned int size, u64 xstate_mask)
 #if defined CONFIG_X86_32 || defined CONFIG_IA32_EMULATION
 	x86_32_regsets[REGSET_XSTATE].n = size / sizeof(u64);
 #endif
-	xstate_fx_sw_bytes[USER_XSTATE_XCR0_WORD] = xstate_mask;
+	xstate_fx_sw_bytes[USER_XSTATE_XCR0_WORD] = xstate_mask &
+		~XSTATE_SUPERVISOR;
 }
 
 const struct user_regset_view *task_user_regset_view(struct task_struct *task)

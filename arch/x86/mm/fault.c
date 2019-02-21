@@ -1351,6 +1351,7 @@ void do_user_addr_fault(struct pt_regs *regs,
 	if (unlikely(!down_read_trylock(&mm->mmap_sem))) {
 		if (!(sw_error_code & X86_PF_USER) &&
 		    !search_exception_tables(regs->ip)) {
+			goto retry;
 			/*
 			 * Fault from code in kernel from
 			 * which we do not expect faults.

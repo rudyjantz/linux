@@ -214,6 +214,16 @@ int fpu__copy(struct fpu *dst_fpu, struct fpu *src_fpu)
 		memcpy(&src_fpu->state, &dst_fpu->state, fpu_kernel_xstate_size);
 		copy_kernel_to_fpregs(&src_fpu->state);
 	}
+	if (fpu_has_pt_enabled(dst_fpu))
+		copy_kernel_to_xregs(&dst_fpu->state.xsave, -1);
+	preempt_enable();
+}
+
+int fpu__copy(struct fpu *dst_fpu, struct fpu *src_fpu)
+{
+	dst_fpu->counter = 0;
+	dst_fpu->fpregs_active = 0;
+	dst_fpu->last_cpu = -1;
 
 	trace_x86_fpu_copy_src(src_fpu);
 	trace_x86_fpu_copy_dst(dst_fpu);
@@ -366,7 +376,7 @@ void fpu__drop(struct fpu *fpu)
 static inline void copy_init_fpstate_to_fpregs(void)
 {
 	if (use_xsave())
-		copy_kernel_to_xregs(&init_fpstate.xsave, -1);
+		copy_kernel_to_xregs(&init_fpstate.xsave, ~XSTATE_SUPERVISOR);
 	else if (static_cpu_has(X86_FEATURE_FXSR))
 		copy_kernel_to_fxregs(&init_fpstate.fxsave);
 	else

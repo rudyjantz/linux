@@ -114,6 +114,7 @@ enum xfeature {
 	XFEATURE_Hi16_ZMM,
 	XFEATURE_PT_UNIMPLEMENTED_SO_FAR,
 	XFEATURE_PKRU,
+        XFEATURE_INTEL_PT,
 
 	XFEATURE_MAX,
 };
@@ -126,7 +127,8 @@ enum xfeature {
 #define XFEATURE_MASK_OPMASK		(1 << XFEATURE_OPMASK)
 #define XFEATURE_MASK_ZMM_Hi256		(1 << XFEATURE_ZMM_Hi256)
 #define XFEATURE_MASK_Hi16_ZMM		(1 << XFEATURE_Hi16_ZMM)
-#define XFEATURE_MASK_PT		(1 << XFEATURE_PT_UNIMPLEMENTED_SO_FAR)
+//#define XFEATURE_MASK_PT		(1 << XFEATURE_PT_UNIMPLEMENTED_SO_FAR)
+#define XFEATURE_MASK_PT		(1 << XFEATURE_INTEL_PT)
 #define XFEATURE_MASK_PKRU		(1 << XFEATURE_PKRU)
 
 #define XFEATURE_MASK_FPSSE		(XFEATURE_MASK_FP | XFEATURE_MASK_SSE)
@@ -228,6 +230,11 @@ struct pkru_state {
 	u32				pkru;
 	u32				pad;
 } __packed;
+
+/* Intel PT support: */
+struct ipt_struct {
+	u8				reserved[128];
+};
 
 struct xstate_header {
 	u64				xfeatures;

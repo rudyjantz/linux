@@ -19,6 +19,7 @@
 #define XSAVE_YMM_SIZE	    256
 #define XSAVE_YMM_OFFSET    (XSAVE_HDR_SIZE + XSAVE_HDR_OFFSET)
 
+<<<<<<< HEAD
 /* Supervisor features */
 #define XFEATURE_MASK_SUPERVISOR (XFEATURE_MASK_PT)
 
@@ -32,6 +33,20 @@
 				 XFEATURE_MASK_PKRU | \
 				 XFEATURE_MASK_BNDREGS | \
 				 XFEATURE_MASK_BNDCSR)
+=======
+/* Supported features which support lazy state saving */
+#define XSTATE_LAZY	(XSTATE_FP | XSTATE_SSE | XSTATE_YMM		      \
+			| XSTATE_OPMASK | XSTATE_ZMM_Hi256 | XSTATE_Hi16_ZMM)
+
+/* Supported features which require eager state saving */
+#define XSTATE_EAGER	(XSTATE_BNDREGS | XSTATE_BNDCSR | XSTATE_INTEL_PT)
+
+/* Supported supervisor features */
+#define XSTATE_SUPERVISOR XSTATE_INTEL_PT
+
+/* All currently supported features */
+#define XCNTXT_MASK	(XSTATE_LAZY | XSTATE_EAGER | XSTATE_SUPERVISOR)
+>>>>>>> v4.2-griffin
 
 #ifdef CONFIG_X86_64
 #define REX_PREFIX	"0x48, "

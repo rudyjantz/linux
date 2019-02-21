@@ -471,6 +471,7 @@ DECLARE_PER_CPU(struct fpu *, fpu_fpregs_owner_ctx);
  * valid if the fpu->last_cpu matches the CPU, and the fpu_fpregs_owner_ctx
  * matches the FPU.
  *
+<<<<<<< HEAD
  * If the FPU register state is valid, the kernel can skip restoring the
  * FPU state from memory.
  *
